@@ -1,0 +1,36 @@
+# This file is provided for development purposes only.
+# It should not be used in production.
+# Versions of dependencies should match what's running
+# in production as closely as possible.
+
+version: "3.9"
+services:
+
+  db:
+    build: ./docker/postgres
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_DB: app-dev
+      POSTGRES_USER: app-dev
+      POSTGRES_PASSWORD: app-dev
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - app
+
+  redis:
+    image: redis:7.0-alpine
+    ports:
+      - 6379:6379
+    volumes:
+      - rddata:/data
+    networks:
+      - app
+
+networks:
+  app:
+
+volumes:
+  pgdata:
+  rddata:
