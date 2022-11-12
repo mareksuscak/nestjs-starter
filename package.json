@@ -13,12 +13,17 @@
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
+    "repl": "nest start repl",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
+    "pretest": "MIKRO_ORM_ENV=.env.test npx mikro-orm schema:drop --drop-migrations-table --run && MIKRO_ORM_ENV=.env.test npx mikro-orm migration:fresh --seed",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./apps/api/test/jest-e2e.json"
+    "test:e2e": "jest --config ./apps/api/test/jest-e2e.json",
+    "prepare": "husky install",
+    "orm": "npx mikro-orm",
+    "cmd": "CLI_PATH=apps/api/src/cli.ts npx nestjs-command"
   },
   "dependencies": {
     "@mikro-orm/core": "^5.4.2",
