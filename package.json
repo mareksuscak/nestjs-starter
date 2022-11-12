@@ -63,6 +63,7 @@
     "@nestjs/schematics": "^9.0.0",
     "@nestjs/testing": "^9.0.0",
     "@types/bull": "^4.10.0",
+    "@types/cron": "^2.0.0",
     "@types/jest": "29.2.2",
     "@types/node": "^18.11.9",
     "@types/supertest": "^2.0.11",
