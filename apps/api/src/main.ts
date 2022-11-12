@@ -13,21 +13,21 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger, LoggerErrorInterceptor } from 'nestjs-pino';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './shared/all-exceptions.interceptor';
-import helmet from 'helmet';
-import { NestExpressApplication } from '@nestjs/platform-express';
+import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
+import { fastifyHelmet } from '@fastify/helmet';
 
 async function bootstrap() {
   const logLevel = process.env.NEST_LOG_LEVEL || 'log,error,warn,debug';
-
-  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
-    logger: logLevel.split(',') as LogLevel[],
-    bufferLogs: true,
-  });
-
-  // Trust upstream proxies
-  // https://expressjs.com/en/guide/behind-proxies.html
   const trustProxy = process.env.TRUSTED_PROXIES === 'true' ? true : process.env.TRUSTED_PROXIES;
-  app.set('trust proxy', trustProxy || 'loopback');
+
+  const app = await NestFactory.create<NestFastifyApplication>(
+    AppModule,
+    new FastifyAdapter({ trustProxy: trustProxy || 'loopback' }),
+    {
+      logger: logLevel.split(',') as LogLevel[],
+      bufferLogs: true,
+    },
+  );
 
   // Set global prefix
   // https://docs.nestjs.com/faq/global-prefix#global-prefix
@@ -72,7 +72,16 @@ async function bootstrap() {
 
   // Use helmet (applies security best practices)
   // https://docs.nestjs.com/security/helmet#helmet
-  app.use(helmet());
+  app.register(fastifyHelmet, {
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: [`'self'`],
+        styleSrc: [`'self'`, `'unsafe-inline'`],
+        imgSrc: [`'self'`, 'data:', 'validator.swagger.io'],
+        scriptSrc: [`'self'`, `https: 'unsafe-inline'`],
+      },
+    },
+  });
 
   // Log error details
   // https://github.com/iamolegga/nestjs-pino#expose-stack-trace-and-error-class-in-err-property
@@ -116,6 +125,6 @@ async function bootstrap() {
   // Launch the application. We intentionally do not pass in the host and let the framework pick the IP version.
   const port = configService.get<string>('PORT', '3000');
   const portNumber = parseInt(port, 10);
-  await app.listen(portNumber);
+  await app.listen(portNumber, '::');
 }
 bootstrap();
