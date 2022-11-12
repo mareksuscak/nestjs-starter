@@ -45,7 +45,10 @@ async function bootstrap() {
 
   // Log error details
   // https://github.com/iamolegga/nestjs-pino#expose-stack-trace-and-error-class-in-err-property
-  app.useGlobalInterceptors(new LoggerErrorInterceptor());
+  app.useGlobalInterceptors(
+    new LoggerErrorInterceptor(),
+    new ClassSerializerInterceptor(app.get(Reflector), { enableCircularCheck: false }),
+  );
 
   // Enable API versioning
   // https://docs.nestjs.com/techniques/versioning
