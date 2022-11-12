@@ -4,11 +4,11 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { User } from '@app/core/database/entities/user.entity';
-import { HealthController } from './health/health.controller';
+import { HealthModule } from './health/health.module';
 
 @Module({
-  imports: [CoreModule, MikroOrmModule.forFeature([User])],
-  controllers: [AppController, HealthController],
+  imports: [CoreModule, HealthModule, MikroOrmModule.forFeature([User])],
+  controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {}
