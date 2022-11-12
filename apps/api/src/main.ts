@@ -29,6 +29,12 @@ async function bootstrap() {
   const trustProxy = process.env.TRUSTED_PROXIES === 'true' ? true : process.env.TRUSTED_PROXIES;
   app.set('trust proxy', trustProxy || 'loopback');
 
+  // Set global prefix
+  // https://docs.nestjs.com/faq/global-prefix#global-prefix
+  app.setGlobalPrefix('api', {
+    exclude: [{ path: 'healthz', method: RequestMethod.GET }],
+  });
+
   // Find the config service in the container
   // https://docs.nestjs.com/techniques/configuration#using-in-the-maints
   const configService = app.get<ConfigService>(ConfigService);
