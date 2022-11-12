@@ -25,18 +25,14 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     let error: HttpException;
     if (exception instanceof UniqueConstraintViolationException) {
-      error = new BadRequestException({
-        statusCode: 400,
-        message: 'Unique constraint violation',
-      });
+      error = new BadRequestException({ statusCode: 400, message: 'Unique constraint violation' });
     } else if (exception instanceof ValidationError) {
-      error = new BadRequestException({
-        statusCode: 400,
-        message: exception.message,
-      });
+      error = new BadRequestException({ statusCode: 400, message: exception.message });
     } else if (!(exception instanceof HttpException)) {
       this.logger.error(exception);
-      error = new InternalServerErrorException();
+      error = new InternalServerErrorException(
+        process.env.NODE_ENV !== 'production' ? { statusCode: 500, message: exception.message } : undefined,
+      );
     } else {
       error = exception;
     }
