@@ -32,7 +32,7 @@ const config: MikroOrmModuleOptions = {
   seeder: {
     path: 'dist/libs/core/src/database/seeder',
     pathTs: 'libs/core/src/database/seeder',
-    defaultSeeder: 'UserSeeder',
+    defaultSeeder: 'DatabaseSeeder',
     glob: '!(*.d).{js,ts}',
   },
 
@@ -41,6 +41,12 @@ const config: MikroOrmModuleOptions = {
     path: 'dist/libs/core/database/migrations',
     pathTs: 'libs/core/src/database/migrations',
     glob: '!(*.d).{js,ts}',
+    snapshot: true,
+
+    // Mikro ORM PG driver requires a super user role because it uses a trick where it changes the session role to `replica`
+    // temporarily in order to disable foreign key checks when running migrations. This is problematic and insecure.
+    // The official recommendation is to disable this behavior.
+    disableForeignKeys: false,
   },
 
   pool: {
