@@ -1,19 +1,33 @@
-import { LogLevel, ValidationPipe, VersioningType, VERSION_NEUTRAL } from '@nestjs/common';
-import { HttpAdapterHost, NestFactory } from '@nestjs/core';
+import {
+  ClassSerializerInterceptor,
+  LogLevel,
+  RequestMethod,
+  UnprocessableEntityException,
+  ValidationPipe,
+  VersioningType,
+  VERSION_NEUTRAL,
+} from '@nestjs/common';
+import { HttpAdapterHost, NestFactory, Reflector } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger, LoggerErrorInterceptor } from 'nestjs-pino';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './shared/all-exceptions.interceptor';
 import helmet from 'helmet';
+import { NestExpressApplication } from '@nestjs/platform-express';
 
 async function bootstrap() {
   const logLevel = process.env.NEST_LOG_LEVEL || 'log,error,warn,debug';
 
-  const app = await NestFactory.create(AppModule, {
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     logger: logLevel.split(',') as LogLevel[],
     bufferLogs: true,
   });
+
+  // Trust upstream proxies
+  // https://expressjs.com/en/guide/behind-proxies.html
+  const trustProxy = process.env.TRUSTED_PROXIES === 'true' ? true : process.env.TRUSTED_PROXIES;
+  app.set('trust proxy', trustProxy || 'loopback');
 
   // Find the config service in the container
   // https://docs.nestjs.com/techniques/configuration#using-in-the-maints
