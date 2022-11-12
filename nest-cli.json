@@ -6,6 +6,7 @@
   "root": "apps/api",
   "compilerOptions": {
     "webpack": true,
+    "plugins": ["@nestjs/swagger"],
     "tsConfigPath": "apps/api/tsconfig.app.json"
   },
   "projects": {
