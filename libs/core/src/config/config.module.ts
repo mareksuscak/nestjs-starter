@@ -4,10 +4,5 @@ const currentEnvironment = process.env.NODE_ENV || 'development';
 
 export const ConfigModule = NestConfigModule.forRoot({
   // If a variable is found in multiple files, the former one takes precedence.
-  envFilePath: [
-    `.env.${currentEnvironment}.local`,
-    `.env.${currentEnvironment}`,
-    '.env.local',
-    '.env',
-  ],
+  envFilePath: [`.env.${currentEnvironment}.local`, `.env.${currentEnvironment}`, '.env.local', '.env'],
 });

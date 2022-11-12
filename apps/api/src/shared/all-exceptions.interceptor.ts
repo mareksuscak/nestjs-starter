@@ -1,7 +1,4 @@
-import {
-  UniqueConstraintViolationException,
-  ValidationError,
-} from '@mikro-orm/core';
+import { UniqueConstraintViolationException, ValidationError } from '@mikro-orm/core';
 import {
   ExceptionFilter,
   Catch,
@@ -44,10 +41,6 @@ export class AllExceptionsFilter implements ExceptionFilter {
       error = exception;
     }
 
-    httpAdapter.reply(
-      ctx.getResponse(),
-      error.getResponse(),
-      error.getStatus(),
-    );
+    httpAdapter.reply(ctx.getResponse(), error.getResponse(), error.getStatus());
   }
 }
