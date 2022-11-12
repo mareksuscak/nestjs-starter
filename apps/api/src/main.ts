@@ -1,9 +1,4 @@
-import {
-  LogLevel,
-  ValidationPipe,
-  VersioningType,
-  VERSION_NEUTRAL,
-} from '@nestjs/common';
+import { LogLevel, ValidationPipe, VersioningType, VERSION_NEUTRAL } from '@nestjs/common';
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
@@ -61,10 +56,7 @@ async function bootstrap() {
 
   // Ensure CORS is on
   // https://docs.nestjs.com/security/cors
-  const allowedOrigins = configService.get<string>(
-    'CORS_ALLOW_ORIGIN',
-    '^https?://(localhost|127.0.0.1)(:[0-9]+)?$',
-  );
+  const allowedOrigins = configService.get<string>('CORS_ALLOW_ORIGIN', '^https?://(localhost|127.0.0.1)(:[0-9]+)?$');
 
   app.enableCors({
     origin: new RegExp(allowedOrigins),
