@@ -5,7 +5,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 export class SchedulerService {
   private readonly logger = new Logger(SchedulerService.name);
 
-  @Cron('* * * * * *')
+  @Cron(CronExpression.EVERY_SECOND)
   handleCron() {
     this.logger.debug('Called every second');
   }
