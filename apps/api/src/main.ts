@@ -31,6 +31,17 @@ async function bootstrap() {
       whitelist: true,
       transform: true,
       forbidUnknownValues: true,
+
+      exceptionFactory(validationErrors = []) {
+        return new UnprocessableEntityException(
+          validationErrors.flatMap((validationError) => {
+            return Object.values(validationError.constraints).map((constraint) => ({
+              field: validationError.property,
+              message: constraint,
+            }));
+          }),
+        );
+      },
     }),
   );
 
