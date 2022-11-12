@@ -78,9 +78,9 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document);
 
-  // Launch the application
+  // Launch the application. We intentionally do not pass in the host and let the framework pick the IP version.
   const port = configService.get<string>('PORT', '3000');
   const portNumber = parseInt(port, 10);
-  await app.listen(portNumber, '0.0.0.0');
+  await app.listen(portNumber);
 }
 bootstrap();
