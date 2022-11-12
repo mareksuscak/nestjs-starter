@@ -51,6 +51,7 @@ async function bootstrap() {
   // https://docs.nestjs.com/techniques/versioning
   app.enableVersioning({
     type: VersioningType.URI,
+    prefix: 'v',
     defaultVersion: VERSION_NEUTRAL,
   });
 
