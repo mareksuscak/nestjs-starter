@@ -6,7 +6,9 @@
   "root": "apps/api",
   "compilerOptions": {
     "webpack": true,
-    "plugins": ["@nestjs/swagger"],
+    "plugins": [
+      "@nestjs/swagger"
+    ],
     "tsConfigPath": "apps/api/tsconfig.app.json"
   },
   "projects": {
@@ -53,6 +55,15 @@
       "sourceRoot": "libs/core/src",
       "compilerOptions": {
         "tsConfigPath": "libs/core/tsconfig.lib.json"
+      }
+    },
+    "hub": {
+      "type": "application",
+      "root": "apps/hub",
+      "entryFile": "main",
+      "sourceRoot": "apps/hub/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/hub/tsconfig.app.json"
       }
     }
   }
