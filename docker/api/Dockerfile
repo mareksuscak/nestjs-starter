@@ -11,8 +11,11 @@ WORKDIR /usr/src/app
 COPY package.json yarn.lock ./
 RUN yarn install --frozen-lockfile
 COPY . .
-RUN yarn run build
+RUN yarn run build api
+RUN yarn run build worker
+RUN yarn run build scheduler
 
+# production stage
 FROM base as production
 ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}
@@ -24,5 +27,7 @@ ENV TZ=Etc/UTC
 WORKDIR /usr/src/app
 COPY package.json yarn.lock ./
 RUN yarn install --frozen-lockfile && yarn cache clean
+COPY --from=build /usr/src/app/apps ./apps
+COPY --from=build /usr/src/app/libs ./libs
 COPY --from=build /usr/src/app/dist ./dist
-CMD [ "npm", "start" ]
+CMD [ "node", "dist/apps/api/main.js" ]

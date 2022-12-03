@@ -1,0 +1,371 @@
+version: 2.1
+
+orbs:
+  # Documentation:
+  # https://circleci.com/developer/orbs/orb/eddiewebb/queue#usage-examples
+  queue: eddiewebb/queue@1.6.4
+  gcp-cli: circleci/gcp-cli@2.4.1
+  gcp-gcr: circleci/gcp-gcr@0.15.0
+
+executors:
+  node-docker:
+    parameters:
+      version:
+        description: "version tag"
+        default: "lts"
+        type: string
+    docker:
+      - image: cimg/node:<<parameters.version>>
+    working_directory: ~/workspace
+
+  node-pg-docker:
+    parameters:
+      node-version:
+        description: "node version tag"
+        default: "lts"
+        type: string
+      postgres-version:
+        description: "postgres version tag"
+        default: "14.5"
+        type: string
+    docker:
+      - image: cimg/node:<<parameters.node-version>>
+      - image: postgres:<<parameters.postgres-version>>-alpine
+        environment:
+          POSTGRES_DB: test
+          POSTGRES_USER: username
+          POSTGRES_PASSWORD: password
+    working_directory: ~/workspace
+
+
+jobs:
+  initialize:
+    executor: node-docker
+    steps:
+      - checkout
+      - restore_cache: &yarn_cache
+          keys:
+            - &yarn_cache_key yarn-packages-v2-{{ .Branch }}-{{ checksum "yarn.lock" }}
+            - yarn-packages-v2-{{ .Branch }}-
+            - yarn-packages-v2-
+      - run:
+          name: Install dependencies
+          command: yarn install --frozen-lockfile --non-interactive --cache-folder ~/.cache/yarn
+      - save_cache:
+          paths:
+            - ~/.cache/yarn
+            - node_modules
+          key: *yarn_cache_key
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - workspace/node_modules
+
+  code-quality-checks:
+    executor: node-docker
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Run Linters
+          command: yarn lint
+      - run:
+          name: Check Types
+          command: yarn typecheck
+      - store_test_results:
+          path: test-results
+
+  test:
+    executor: node-pg-docker
+    environment:
+      DATABASE_URL: "postgresql://username:password@127.0.0.1:5432/test"
+      DATABASE_CONN_POOL_SIZE: 25
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/
+      - run:
+          # Our primary container isn't Postgres so run a sleep command until it's ready.
+          name: Waiting for Postgres to be ready
+          command: |
+            for i in `seq 1 30`;
+            do
+              nc -z 127.0.0.1 5432 && echo Success && exit 0
+              echo -n .
+              sleep 1
+            done
+            echo Failed waiting for Postgres && exit 1
+      - run:
+          name: Apply and test DB migrations
+          command: |
+            # Migrate to the latest
+            npx mikro-orm migration:up
+
+            # Roll back and try again with seeds
+            npx mikro-orm migration:fresh --seed
+      - run:
+          name: Run tests
+          command: yarn test:cov --ci --runInBand
+      - run:
+          name: Run tests
+          command: yarn test:e2e --ci --runInBand
+      - store_test_results:
+          path: test-results
+      - store_artifacts:
+          path: coverage
+
+  build-and-push:
+    parameters:
+      registry-url:
+        type: string
+        default: us-west2-docker.pkg.dev
+      image-name:
+        type: string
+      gcloud-service-key:
+        type: env_var_name
+        default: GCLOUD_SERVICE_KEY
+      google-compute-zone:
+        type: env_var_name
+        default: GOOGLE_COMPUTE_ZONE
+      google-compute-region:
+        type: env_var_name
+        default: GOOGLE_COMPUTE_REGION
+      google-project-id:
+        type: env_var_name
+        default: GOOGLE_PROJECT_ID
+    executor:
+      name: gcp-cli/google
+      sdk-version: 410.0.0
+    steps:
+      - checkout
+      - run:
+          name: Set environment variables
+          command: |
+            echo "export CIRCLE_SHA1_SHORT=$(echo $CIRCLE_SHA1 | cut -c -7)" >> $BASH_ENV
+      - run:
+          name: Set up dependencies
+          command: |
+            apt install -qq -y gettext jq
+      - gcp-gcr/gcr-auth:
+          gcloud-service-key: <<parameters.gcloud-service-key>>
+          google-compute-zone: <<parameters.google-compute-zone>>
+          google-project-id: <<parameters.google-project-id>>
+      - run:
+          no_output_timeout: 20m
+          name: Build Docker image for GCR
+          command: |
+            # Generate a docker image URL
+            IMAGE_URL="<<parameters.registry-url>>/${<<parameters.google-project-id>>}/<<parameters.image-name>>:$CIRCLE_SHA1_SHORT"
+
+            DOCKERFILE=docker/api/Dockerfile
+
+            # Submit sources to the builder
+            gcloud beta builds submit --substitutions _IMAGE_URL=$IMAGE_URL,_DOCKERFILE=$DOCKERFILE
+      - gcp-gcr/tag-image:
+          source-tag: $CIRCLE_SHA1_SHORT
+          target-tag: $CIRCLE_BRANCH
+          image: <<parameters.image-name>>
+          registry-url: <<parameters.registry-url>>
+          google-project-id: <<parameters.google-project-id>>
+
+  migrate-db:
+    parameters:
+      db-instance-name:
+        type: env_var_name
+        default: DATABASE_INSTANCE_NAME
+      db-name:
+        type: env_var_name
+        default: DATABASE_NAME
+      db-username:
+        type: env_var_name
+        default: DATABASE_USERNAME
+      db-password:
+        type: env_var_name
+        default: DATABASE_PASSWORD
+      gcloud-service-key:
+        type: env_var_name
+        default: GCLOUD_SERVICE_KEY
+      google-compute-zone:
+        type: env_var_name
+        default: GOOGLE_COMPUTE_ZONE
+      google-compute-region:
+        type: env_var_name
+        default: GOOGLE_COMPUTE_REGION
+      google-project-id:
+        type: env_var_name
+        default: GOOGLE_PROJECT_ID
+    executor: node-docker
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Download the Cloud SQL Proxy
+          command: |
+            wget https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 -O cloud_sql_proxy
+            chmod +x cloud_sql_proxy
+      - run:
+          name: Connect to Cloud SQL in the background
+          background: true
+          command: |
+            echo ${<<parameters.gcloud-service-key>>} >> gcloud-service-key.json
+            ./cloud_sql_proxy -instances=${<<parameters.google-project-id>>}:${<<parameters.google-compute-region>>}:${<<parameters.db-instance-name>>}=tcp:5432 -credential_file=./gcloud-service-key.json
+            rm gcloud-service-key.json
+      - run:
+          name: Apply DB migrations
+          command: |
+            export DATABASE_URL="postgresql://${<<parameters.db-username>>}:${<<parameters.db-password>>}@127.0.0.1:5432/${<<parameters.db-name>>}"
+            export DATABASE_CONN_POOL_SIZE=25
+
+            npx mikro-orm migration:up
+
+  deploy:
+    parameters:
+      registry-url:
+        type: string
+        default: us-west2-docker.pkg.dev
+      image-name:
+        type: string
+      gcloud-service-key:
+        type: env_var_name
+        default: GCLOUD_SERVICE_KEY
+      google-compute-zone:
+        type: env_var_name
+        default: GOOGLE_COMPUTE_ZONE
+      google-compute-region:
+        type: env_var_name
+        default: GOOGLE_COMPUTE_REGION
+      google-project-id:
+        type: env_var_name
+        default: GOOGLE_PROJECT_ID
+    executor:
+      name: gcp-cli/google
+      sdk-version: 410.0.0
+    steps:
+      - gcp-cli/initialize:
+          gcloud-service-key: << parameters.gcloud-service-key >>
+          google-compute-region: << parameters.google-compute-region >>
+          google-compute-zone: << parameters.google-compute-zone >>
+          google-project-id: << parameters.google-project-id >>
+
+      # Critical section. This will only allow 1 concurrent DB migration per branch / environment
+      - queue/until_front_of_line:
+          time: '10'
+
+      - run:
+          name: Generate new revision suffix
+          command: |
+            CIRCLE_SHA1_SHORT=$(echo $CIRCLE_SHA1 | cut -c -7)
+
+            CURRENT_GEN=$(gcloud beta run services describe <<parameters.service-name>> --platform=managed --region=${<<parameters.google-compute-region>>} --format="value(status.observedGeneration)")
+            NEXT_GEN=$((CURRENT_GEN+1))
+            API_REVISION_SUFFIX=$(printf %05d $NEXT_GEN)-$CIRCLE_SHA1_SHORT
+
+            echo "export CIRCLE_SHA1_SHORT=$CIRCLE_SHA1_SHORT" >> $BASH_ENV
+            echo "export API_REVISION_SUFFIX=$API_REVISION_SUFFIX" >> $BASH_ENV
+
+      - gcp-run/deploy:
+          image: '<<parameters.registry-url>>/${<< parameters.google-project-id >>}/<<parameters.image-name>>:${CIRCLE_SHA1_SHORT}'
+          platform: managed
+          region: ${<< parameters.google-compute-region >>}
+          service-name: << parameters.service-name >>
+          unauthenticated: true
+          args: --tag=$CIRCLE_BRANCH --revision-suffix=$API_REVISION_SUFFIX
+
+      - run:
+          command: >
+            # A simple example of how a deployed managed service could be verified or further tested.
+            # This step will send request our "API" and fail if there is unexpected output.
+
+            GCP_API_RESULTS=$(curl -s "$GCP_DEPLOY_ENDPOINT")
+
+            # if [ "$GCP_API_RESULTS" != "Hello World!" ]; then
+            #   echo "Result is unexpected"
+            #   echo 'Result: '
+            #   curl -s "$GCP_DEPLOY_ENDPOINT"
+            #   exit 1;
+            # fi
+          name: Test deployed service.
+
+
+workflows:
+  "Test, build and deploy":
+    jobs:
+      - initialize
+
+      - code-quality-checks:
+          requires:
+            - initialize
+
+      - test:
+          requires:
+            - initialize
+
+      - build-and-push:
+          name: build-and-push-dev
+          filters:
+            branches:
+              only:
+                - develop
+          requires:
+            - code-quality-checks
+            - test
+          context:
+            - app-dev
+          image-name: app-dev/api
+
+      - build-and-push:
+          name: build-and-push-prod
+          filters:
+            branches:
+              only:
+                - main
+          requires:
+            - code-quality-checks
+            - test
+          context:
+            - app-prod
+          image-name: app-prod/api
+
+      - migrate-db:
+          name: migrate-db-dev
+          requires:
+            - build-and-push-dev
+          filters:
+            branches:
+              only: develop
+          context:
+            - app-dev
+
+      - migrate-db:
+          name: migrate-db-prod
+          requires:
+            - build-and-push-prod
+          filters:
+            branches:
+              only: main
+          context:
+            - app-prod
+
+      - deploy:
+          name: deploy-dev
+          requires:
+            - migrate-db-dev
+          filters:
+            branches:
+              only: develop
+          context:
+            - app-dev
+          image-name: app-dev/api
+
+      - deploy:
+          name: deploy-prod
+          requires:
+            - migrate-db-prod
+          filters:
+            branches:
+              only: main
+          context:
+            - app-prod
+          image-name: app-prod/api
