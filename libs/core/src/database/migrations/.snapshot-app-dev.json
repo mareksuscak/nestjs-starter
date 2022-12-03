@@ -64,6 +64,26 @@
           "length": 320,
           "mappedType": "string"
         },
+        "last_login_at": {
+          "name": "last_login_at",
+          "type": "timestamptz(0)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamptz(0)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "mappedType": "datetime"
+        },
         "role": {
           "name": "role",
           "type": "text",
@@ -71,6 +91,7 @@
           "autoincrement": false,
           "primary": false,
           "nullable": false,
+          "default": "'user'",
           "enumItems": [
             "user",
             "admin"
@@ -89,6 +110,14 @@
           "keyName": "user_email_unique",
           "primary": false,
           "unique": true
+        },
+        {
+          "keyName": "user_email_lower_unique",
+          "columnNames": [],
+          "composite": false,
+          "primary": false,
+          "unique": false,
+          "expression": "CREATE UNIQUE INDEX \"user_email_lower_unique\" ON \"user\" (LOWER(\"email\"));"
         },
         {
           "keyName": "user_pkey",
