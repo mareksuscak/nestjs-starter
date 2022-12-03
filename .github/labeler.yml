@@ -1,0 +1,6 @@
+# Add/remove 'enhancement' label if one of Enhancement or New feature options were checked in the PR template
+enhancement:
+    - '(\[x\] Enhancement)|(\[x\] New feature)'
+# Add/remove 'bug' label if Bug fix option was checked in the PR template
+bug:
+    - '\[x\] Bug fix'
