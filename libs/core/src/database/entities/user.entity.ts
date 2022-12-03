@@ -1,6 +1,15 @@
 import { IsEmail } from 'class-validator';
-import { Entity, EntityRepositoryType, Enum, Filter, Formula, Index, Property } from '@mikro-orm/core';
-import { BaseEntity } from './base.entity';
+import {
+  BaseEntity,
+  Entity,
+  EntityRepositoryType,
+  Enum,
+  Filter,
+  Formula,
+  Index,
+  PrimaryKey,
+  Property,
+} from '@mikro-orm/core';
 import { UserRepository } from '../repositories/user.repository';
 
 @Entity({ customRepository: () => UserRepository })
@@ -9,8 +18,11 @@ import { UserRepository } from '../repositories/user.repository';
   name: 'user_email_lower_unique',
   expression: `CREATE UNIQUE INDEX "user_email_lower_unique" ON "user" (LOWER("email"));`,
 })
-export class User extends BaseEntity {
+export class User extends BaseEntity<User, 'id'> {
   [EntityRepositoryType]?: UserRepository;
+
+  @PrimaryKey({ type: 'uuid', defaultRaw: 'generate_ulid()' })
+  id: string;
 
   @Property({ nullable: true })
   firstName?: string;
@@ -30,6 +42,12 @@ export class User extends BaseEntity {
 
   @Property({ nullable: true })
   lastLoginAt?: Date;
+
+  @Property()
+  createdAt: Date = new Date();
+
+  @Property({ onUpdate: () => new Date() })
+  updatedAt: Date = new Date();
 
   @Property({ nullable: true })
   deletedAt?: Date;
