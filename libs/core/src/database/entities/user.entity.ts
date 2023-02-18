@@ -14,10 +14,6 @@ import { UserRepository } from '../repositories/user.repository';
 
 @Entity({ customRepository: () => UserRepository })
 @Filter({ name: 'default', cond: { deletedAt: { $eq: null } }, default: true })
-@Index({
-  name: 'user_email_lower_unique',
-  expression: `CREATE UNIQUE INDEX "user_email_lower_unique" ON "user" (LOWER("email"));`,
-})
 export class User extends BaseEntity<User, 'id'> {
   [EntityRepositoryType]?: UserRepository;
 
@@ -33,6 +29,10 @@ export class User extends BaseEntity<User, 'id'> {
   @Formula((alias) => `CONCAT(${alias}.first_name, ' ', ${alias}.last_name)`)
   fullName?: string;
 
+  @Index({
+    name: 'user_email_lower_unique',
+    expression: `CREATE UNIQUE INDEX "user_email_lower_unique" ON "user" (LOWER("email"));`,
+  })
   @Property({ length: 320, unique: true })
   @IsEmail()
   email: string;

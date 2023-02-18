@@ -12,13 +12,13 @@
     "tsConfigPath": "apps/api/tsconfig.app.json"
   },
   "projects": {
-    "repl": {
-      "type": "application",
-      "root": "apps/api",
-      "entryFile": "repl",
-      "sourceRoot": "apps/api/src",
+    "core": {
+      "type": "library",
+      "root": "libs/core",
+      "entryFile": "index",
+      "sourceRoot": "libs/core/src",
       "compilerOptions": {
-        "tsConfigPath": "apps/api/tsconfig.app.json"
+        "tsConfigPath": "libs/core/tsconfig.lib.json"
       }
     },
     "api": {
@@ -48,15 +48,6 @@
         "tsConfigPath": "apps/worker/tsconfig.app.json"
       }
     },
-    "core": {
-      "type": "library",
-      "root": "libs/core",
-      "entryFile": "index",
-      "sourceRoot": "libs/core/src",
-      "compilerOptions": {
-        "tsConfigPath": "libs/core/tsconfig.lib.json"
-      }
-    },
     "hub": {
       "type": "application",
       "root": "apps/hub",
@@ -64,6 +55,15 @@
       "sourceRoot": "apps/hub/src",
       "compilerOptions": {
         "tsConfigPath": "apps/hub/tsconfig.app.json"
+      }
+    },
+    "repl": {
+      "type": "application",
+      "root": "apps/api",
+      "entryFile": "repl",
+      "sourceRoot": "apps/api/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/api/tsconfig.app.json"
       }
     }
   }

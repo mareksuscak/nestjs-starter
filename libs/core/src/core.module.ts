@@ -3,9 +3,10 @@ import { ConfigModule } from './config/config.module';
 import { CacheModule } from './cache/cache.module';
 import { DatabaseModule } from './database/database.module';
 import { LoggerModule } from './logger/logger.module';
+import { UserModule } from './user/user.module';
 
 @Module({
-  imports: [DatabaseModule, ConfigModule, LoggerModule, CacheModule],
-  exports: [DatabaseModule, ConfigModule, LoggerModule, CacheModule],
+  imports: [DatabaseModule, ConfigModule, LoggerModule, CacheModule, UserModule],
+  exports: [DatabaseModule, ConfigModule, LoggerModule, CacheModule, UserModule],
 })
 export class CoreModule {}
