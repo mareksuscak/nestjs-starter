@@ -3,9 +3,9 @@ version: 2.1
 orbs:
   # Documentation:
   # https://circleci.com/developer/orbs/orb/eddiewebb/queue#usage-examples
-  queue: eddiewebb/queue@1.6.4
-  gcp-cli: circleci/gcp-cli@2.4.1
-  gcp-gcr: circleci/gcp-gcr@0.15.0
+  queue: eddiewebb/queue@1.12.0
+  gcp-cli: circleci/gcp-cli@3.0.1
+  gcp-gcr: circleci/gcp-gcr@0.15.1
 
 executors:
   node-docker:
@@ -26,7 +26,7 @@ executors:
         type: string
       postgres-version:
         description: "postgres version tag"
-        default: "14.5"
+        default: "15.2"
         type: string
     docker:
       - image: cimg/node:<<parameters.node-version>>
