@@ -27,8 +27,8 @@
         "libs/core/src/*"
       ]
     },
-    "ts-node": {
-      "files": true
-    }
-  }
+  },
+  "ts-node": {
+    "files": true
+  },
 }
