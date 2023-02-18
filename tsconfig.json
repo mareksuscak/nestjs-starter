@@ -26,6 +26,9 @@
       "@app/core/*": [
         "libs/core/src/*"
       ]
-    }
+    },
+    "ts-node": {
+      "files": true
+    },
   }
 }
