@@ -9,12 +9,12 @@ import {
 } from '@nestjs/common';
 import { HttpAdapterHost, NestFactory, Reflector } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
+import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
+import { fastifyHelmet } from '@fastify/helmet';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger, LoggerErrorInterceptor } from 'nestjs-pino';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './shared/all-exceptions.interceptor';
-import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
-import { fastifyHelmet } from '@fastify/helmet';
 
 async function bootstrap() {
   const logLevel = process.env.NEST_LOG_LEVEL || 'log,error,warn,debug';
