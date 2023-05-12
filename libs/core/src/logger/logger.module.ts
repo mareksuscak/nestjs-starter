@@ -25,6 +25,7 @@ const getTransport = () => {
     return {
       target: 'pino-pretty',
       options: {
+        singleLine: true,
         colorize: true,
         messageKey: 'message',
         ignore: 'severity,req,res',
