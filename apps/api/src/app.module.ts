@@ -4,18 +4,12 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { User } from '@app/core/database/entities/user.entity';
-import { HealthModule } from './health/health.module';
 import { MailerModule } from '@app/core/mailer';
-import { PrometheusModule } from '@willsoto/nestjs-prometheus';
+import { HealthModule } from './health/health.module';
+import { MetricsModule } from './metrics/metrics.module';
 
 @Module({
-  imports: [
-    PrometheusModule.register({ controller: MetricsController }),
-    CoreModule,
-    HealthModule,
-    MailerModule,
-    MikroOrmModule.forFeature([User]),
-  ],
+  imports: [CoreModule, HealthModule, MetricsModule, MailerModule, MikroOrmModule.forFeature([User])],
   controllers: [AppController],
   providers: [AppService],
 })

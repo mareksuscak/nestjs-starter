@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from './config/config.module';
-import { CacheModule } from './cache/cache.module';
-import { DatabaseModule } from './database/database.module';
-import { LoggerModule } from './logger/logger.module';
-import { UserModule } from './user/user.module';
-import { MailerModule } from './mailer/mailer.module';
+import { ConfigModule } from './config';
+import { CacheModule } from './cache';
+import { DatabaseModule } from './database';
+import { LoggerModule } from './logger';
+import { UserModule } from './user';
+import { MailerModule } from './mailer';
 
 @Module({
   imports: [DatabaseModule, ConfigModule, LoggerModule, CacheModule, UserModule, MailerModule],
