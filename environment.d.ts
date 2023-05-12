@@ -4,7 +4,6 @@ declare namespace NodeJS {
 
     readonly PORT?: string;
     readonly PUBLIC_URL?: string;
-    readonly FE_PUBLIC_URL?: string;
     readonly TRUSTED_PROXIES?: string;
     readonly CORS_ALLOW_ORIGIN?: string;
 
