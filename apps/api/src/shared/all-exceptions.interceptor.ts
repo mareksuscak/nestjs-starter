@@ -6,7 +6,9 @@ import {
   HttpException,
   InternalServerErrorException,
   BadRequestException,
+  ForbiddenException,
   Logger,
+  HttpStatus,
 } from '@nestjs/common';
 import { HttpAdapterHost } from '@nestjs/core';
 
@@ -25,13 +27,25 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     let error: HttpException;
     if (exception instanceof UniqueConstraintViolationException) {
-      error = new BadRequestException({ statusCode: 400, message: 'Unique constraint violation' });
+      error = new BadRequestException({ statusCode: HttpStatus.BAD_REQUEST, message: 'Unique constraint violation' });
     } else if (exception instanceof ValidationError) {
-      error = new BadRequestException({ statusCode: 400, message: exception.message });
+      error = new BadRequestException({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: exception.message,
+        details: exception.getEntity(),
+      });
+    } else if (exception instanceof ForbiddenException) {
+      error = new ForbiddenException({ statusCode: HttpStatus.FORBIDDEN, message: exception.message });
     } else if (!(exception instanceof HttpException)) {
       this.logger.error(exception);
       error = new InternalServerErrorException(
-        process.env.NODE_ENV !== 'production' ? { statusCode: 500, message: exception.message } : undefined,
+        process.env.NODE_ENV !== 'production' || process.env.APP_DEBUG === 'true'
+          ? {
+              statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+              message: (exception as Error).message,
+              details: (exception as Error).stack,
+            }
+          : undefined,
       );
     } else {
       error = exception;
