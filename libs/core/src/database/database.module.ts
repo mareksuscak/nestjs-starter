@@ -1,4 +1,6 @@
+import { Module } from '@nestjs/common';
 import { MikroOrmModule, MikroOrmModuleSyncOptions } from '@mikro-orm/nestjs';
+import { User } from './entities/user.entity';
 import mikroOrmConfig from './mikro-orm.config';
 
 const mikroOrmOptions: MikroOrmModuleSyncOptions = {
@@ -9,4 +11,7 @@ const mikroOrmOptions: MikroOrmModuleSyncOptions = {
   autoLoadEntities: true,
 };
 
-export const DatabaseModule = MikroOrmModule.forRoot(mikroOrmOptions);
+@Module({
+  imports: [MikroOrmModule.forRoot(mikroOrmOptions), MikroOrmModule.forFeature([User])],
+})
+export class DatabaseModule {}
