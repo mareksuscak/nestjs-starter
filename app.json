@@ -14,9 +14,6 @@
         "description": "origins allowed to access the API",
         "value": "(.+)"
       },
-      "TITLE": {
-          "description": "title for your site"
-      },
       "APP_SECRET": {
           "generator": "secret"
       },
