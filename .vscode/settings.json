@@ -15,12 +15,10 @@
   },
 
   "prettier.enable": false,
-  "tslint.enable": false,
   "typescript.format.enable": false,
   "javascript.format.enable": false,
 
   "eslint.enable": true,
-  "eslint.alwaysShowStatus": true,
   "eslint.packageManager": "yarn",
 
   /* Exclude some folders from search and/or file tree */
