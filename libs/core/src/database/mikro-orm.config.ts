@@ -1,7 +1,8 @@
-import { MikroOrmModuleOptions } from '@mikro-orm/nestjs';
-import { SqlHighlighter } from '@mikro-orm/sql-highlighter';
-import { LoadStrategy, LoggerNamespace } from '@mikro-orm/core';
 import { Logger } from '@nestjs/common';
+import { MikroOrmModuleOptions } from '@mikro-orm/nestjs';
+import { PostgreSqlDriver } from '@mikro-orm/postgresql';
+import { LoadStrategy, LoggerNamespace } from '@mikro-orm/core';
+import { SqlHighlighter } from '@mikro-orm/sql-highlighter';
 
 // Instantiate the logger
 const logger = new Logger('MikroORM');
@@ -17,7 +18,7 @@ const logLevel = process.env.MIKROORM_LOG_LEVEL
   : false;
 
 const config: MikroOrmModuleOptions = {
-  type: 'postgresql',
+  driver: PostgreSqlDriver,
   clientUrl: process.env.DATABASE_URL,
   logger: logger.debug.bind(logger),
   debug: logLevel,
@@ -51,7 +52,7 @@ const config: MikroOrmModuleOptions = {
 
   pool: {
     min: 1,
-    max: +process.env.DATABASE_CONN_POOL_SIZE || 10,
+    max: +process.env.DATABASE_CONN_POOL_SIZE || 25,
   },
 };
 
