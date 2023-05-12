@@ -5,7 +5,10 @@ module.exports = {
     tsconfigRootDir : __dirname,
     sourceType: 'module',
   },
-  plugins: ['@typescript-eslint/eslint-plugin'],
+  plugins: [
+    '@typescript-eslint/eslint-plugin',
+    'deprecation'
+  ],
   extends: [
     'plugin:@typescript-eslint/recommended',
     'plugin:prettier/recommended',
@@ -17,6 +20,7 @@ module.exports = {
   },
   ignorePatterns: ['.eslintrc.js'],
   rules: {
+    'deprecation/deprecation': ['warn'],
     'array-bracket-newline': ['error', 'consistent'],
     'array-element-newline': ['warn', 'consistent'],
     '@typescript-eslint/interface-name-prefix': ['off'],
