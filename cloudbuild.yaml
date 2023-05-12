@@ -1,0 +1,25 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    entrypoint: 'bash'
+    args:
+      [
+        '-c',
+        'docker pull ${_IMAGE_URL}:latest || exit 0'
+      ]
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      [
+        'build',
+        '-f', '${_DOCKERFILE}',
+        '-t', '${_IMAGE_URL}:latest',
+        '-t', '${_IMAGE_URL}:${_IMAGE_TAG}',
+        '--cache-from', '${_IMAGE_URL}:latest',
+        '.'
+      ]
+
+options:
+  machineType: 'E2_HIGHCPU_8'
+
+images: ['${_IMAGE_URL}:${_IMAGE_TAG}', '${_IMAGE_URL}:latest']
+timeout: 1800s
