@@ -9,7 +9,7 @@ export class MailerService {
     });
 
     const response = await transport.sendMail({
-      to: 'marek@codelab303.com',
+      to: 'marek.suscak@gmail.com',
       from: 'noreply@example.com',
       text: 'Hello world!',
     });
