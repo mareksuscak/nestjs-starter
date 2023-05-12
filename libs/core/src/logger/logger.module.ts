@@ -1,3 +1,4 @@
+import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { LoggerModule as PinoLoggerModule } from 'nestjs-pino';
 
@@ -48,39 +49,44 @@ const getLevel = () => {
   }
 };
 
-export const LoggerModule = PinoLoggerModule.forRootAsync({
-  imports: [ConfigModule],
-  inject: [ConfigService],
-  useFactory: async (config: ConfigService) => {
-    return {
-      pinoHttp: {
-        name: 'app',
+@Module({
+  imports: [
+    PinoLoggerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (config: ConfigService) => {
+        return {
+          pinoHttp: {
+            name: 'app',
 
-        // https://getpino.io/#/docs/api?id=level-string
-        level: getLevel(),
+            // https://getpino.io/#/docs/api?id=level-string
+            level: getLevel(),
 
-        // Use a transport and offload logging to a worker
-        // https://getpino.io/#/docs/api?id=transport-object
-        transport: getTransport(),
+            // Use a transport and offload logging to a worker
+            // https://getpino.io/#/docs/api?id=transport-object
+            transport: getTransport(),
 
-        // Redaction of sensitive keys
-        // https://getpino.io/#/docs/redaction
-        redact: ['req.headers.authorization'],
+            // Redaction of sensitive keys
+            // https://getpino.io/#/docs/redaction
+            redact: ['req.headers.authorization'],
 
-        // Needed for Google Cloud Logging preferred format compatibility
-        // https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#logseverity
-        messageKey: 'message',
+            // Needed for Google Cloud Logging preferred format compatibility
+            // https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#logseverity
+            messageKey: 'message',
 
-        // https://getpino.io/#/docs/api?id=formatters-object
-        formatters: {
-          level(label, number) {
-            return {
-              severity: PinoLevelToSeverityLookup[label] || PinoLevelToSeverityLookup['info'],
-              level: number,
-            };
+            // https://getpino.io/#/docs/api?id=formatters-object
+            formatters: {
+              level(label, number) {
+                return {
+                  severity: PinoLevelToSeverityLookup[label] || PinoLevelToSeverityLookup['info'],
+                  level: number,
+                };
+              },
+            },
           },
-        },
+        };
       },
-    };
-  },
-});
+    }),
+  ],
+})
+export class LoggerModule {}
