@@ -32,7 +32,10 @@ async function bootstrap() {
   // Set global prefix
   // https://docs.nestjs.com/faq/global-prefix#global-prefix
   app.setGlobalPrefix('api', {
-    exclude: [{ path: 'healthz', method: RequestMethod.GET }],
+    exclude: [
+      { path: 'healthz', method: RequestMethod.GET },
+      { path: 'metrics', method: RequestMethod.GET },
+    ],
   });
 
   // Find the config service in the container
