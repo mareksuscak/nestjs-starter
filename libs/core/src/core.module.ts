@@ -8,6 +8,6 @@ import { MailerModule } from './mailer';
 
 @Module({
   imports: [DatabaseModule, ConfigModule, LoggerModule, CacheModule, UserModule, MailerModule],
-  exports: [DatabaseModule, ConfigModule, LoggerModule, CacheModule, UserModule],
+  exports: [DatabaseModule, ConfigModule, LoggerModule, CacheModule, UserModule, MailerModule],
 })
 export class CoreModule {}
