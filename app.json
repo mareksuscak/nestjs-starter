@@ -1,53 +1,53 @@
 {
-  "name": "nestjs-service",
+  "name": "nestjs-starter",
   "env": {
-      "PUBLIC_URL": {
-          "description": "public url for your site",
-          "value": "",
-          "required": false
-      },
-      "TRUSTED_PROXIES": {
-        "description": "whether to trust proxies or not",
-        "value": "true"
-      },
-      "CORS_ALLOW_ORIGIN": {
-        "description": "origins allowed to access the API",
-        "value": "(.+)"
-      },
-      "APP_SECRET": {
-          "generator": "secret"
-      },
-      "APP_DEBUG": {
-          "description": "enable debug mode",
-          "value": "false"
-      },
-      "REDIS_URL": {
-          "description": "redis url",
-          "value": "redis://localhost:6379"
-      },
-      "DATABASE_URL": {
-          "description": "database url",
-          "value": "socket://<USER>:<PASSWORD>@/cloudsql/<PROJECT_ID>:<REGION>:<INSTANCE_NAME>?db=<DB_NAME>"
-      },
-      "DATABASE_CONN_POOL_SIZE": {
-          "description": "database connection pool size",
-          "value": "50"
-      },
-      "MIKROORM_LOG_LEVEL": {
-        "description": "database connection pool size",
-        "value": "info"
-      },
-      "NEST_LOG_LEVEL": {
-        "description": "database connection pool size",
-        "value": "log,error,warn"
-      }
+    "PUBLIC_URL": {
+      "description": "public url for your site",
+      "value": "",
+      "required": false
+    },
+    "TRUSTED_PROXIES": {
+      "description": "whether to trust proxies or not",
+      "value": "true"
+    },
+    "CORS_ALLOW_ORIGIN": {
+      "description": "origins allowed to access the API",
+      "value": "(.+)"
+    },
+    "APP_SECRET": {
+      "generator": "secret"
+    },
+    "APP_DEBUG": {
+      "description": "enable debug mode",
+      "value": "false"
+    },
+    "REDIS_URL": {
+      "description": "redis url",
+      "value": "redis://localhost:6379"
+    },
+    "DATABASE_URL": {
+      "description": "database url",
+      "value": "socket://<USER>:<PASSWORD>@/cloudsql/<PROJECT_ID>:<REGION>:<INSTANCE_NAME>?db=<DB_NAME>"
+    },
+    "DATABASE_CONN_POOL_SIZE": {
+      "description": "database connection pool size",
+      "value": "50"
+    },
+    "MIKROORM_LOG_LEVEL": {
+      "description": "database connection pool size",
+      "value": "info"
+    },
+    "NEST_LOG_LEVEL": {
+      "description": "database connection pool size",
+      "value": "log,error,warn"
+    }
   },
   "options": {
-      "allow-unauthenticated": true,
-      "memory": "512Mi",
-      "cpu": "1",
-      "http2": false,
-      "concurrency": 80,
-      "max-instances": 10
+    "allow-unauthenticated": true,
+    "memory": "512Mi",
+    "cpu": "1",
+    "http2": false,
+    "concurrency": 80,
+    "max-instances": 10
   }
 }

@@ -3,9 +3,8 @@
 # Versions of dependencies should match what's running
 # in production as closely as possible.
 
-version: "3.9"
+version: '3.9'
 services:
-
   db:
     build: ./docker/postgres
     ports:
@@ -35,7 +34,6 @@ services:
       - 1080:1080
     networks:
       - app
-
 
 networks:
   app:
